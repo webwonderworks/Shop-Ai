@@ -2,20 +2,47 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import AppShell from "../components/AppShell";
 import ShopPreview from "../components/ShopPreview";
+import AreaSelector from "../components/AreaSelector";
+import LiveEditor from "../components/LiveEditor";
+import { PLATFORMS } from "../../config/platforms";
 
 const API = "http://localhost:3001";
 
 const DEFAULT_DESIGN_CONFIG = {
-  primaryColor: "#2563eb",
-  secondaryColor: "#f3f4f6",
-  accentColor: "#dc2626",
-  fontFamily: "system-ui, -apple-system, sans-serif",
-  fontSize: 16,
-  borderRadius: 8,
-  spacing: 16,
-  buttonStyle: "rounded",
-  cardStyle: "elevated",
-  showABDABadge: true,
+  header: {
+    backgroundColor: "#2563eb",
+    textColor: "#ffffff",
+    logoSize: 40,
+    navigationStyle: "horizontal",
+  },
+  hero: {
+    backgroundColor: "#1e40af",
+    textColor: "#ffffff",
+    backgroundImage: null,
+    buttonStyle: "rounded",
+  },
+  products: {
+    gridColumns: 3,
+    cardStyle: "elevated",
+    cardShadow: true,
+    priceDisplay: "visible",
+  },
+  footer: {
+    backgroundColor: "#1f2937",
+    textColor: "#ffffff",
+    columnLayout: 3,
+  },
+  sidebar: {
+    backgroundColor: "#f3f4f6",
+    textColor: "#1f2937",
+    categoryStyle: "list",
+  },
+  global: {
+    fontFamily: "system-ui, -apple-system, sans-serif",
+    fontSize: 16,
+    borderRadius: 8,
+    spacing: 16,
+  },
 };
 
 export default function DesignerPage() {
@@ -23,11 +50,14 @@ export default function DesignerPage() {
   const navigate = useNavigate();
 
   const [project, setProject] = useState(null);
+  const [platform, setPlatform] = useState("mauve_system3");
   const [designConfig, setDesignConfig] = useState(DEFAULT_DESIGN_CONFIG);
-  const [step, setStep] = useState(1);
+  const [selectedArea, setSelectedArea] = useState("header");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [history, setHistory] = useState([DEFAULT_DESIGN_CONFIG]);
+  const [historyIndex, setHistoryIndex] = useState(0);
 
   useEffect(() => {
     loadProject();
@@ -43,6 +73,7 @@ export default function DesignerPage() {
       }
 
       setProject(data.project);
+      setPlatform(data.project.data.platform || "mauve_system3");
 
       if (data.project.versions && data.project.versions.length > 0) {
         const latestVersion = data.project.versions[0];
@@ -56,6 +87,39 @@ export default function DesignerPage() {
       setErrorMsg(err.message || "Projekt konnte nicht geladen werden.");
     } finally {
       setLoading(false);
+    }
+  }
+
+  function updateAreaConfig(areaName, updates) {
+    const newConfig = {
+      ...designConfig,
+      [areaName]: {
+        ...designConfig[areaName],
+        ...updates,
+      },
+    };
+    setDesignConfig(newConfig);
+    addToHistory(newConfig);
+  }
+
+  function addToHistory(config) {
+    const newHistory = history.slice(0, historyIndex + 1);
+    newHistory.push(config);
+    setHistory(newHistory);
+    setHistoryIndex(newHistory.length - 1);
+  }
+
+  function undo() {
+    if (historyIndex > 0) {
+      setHistoryIndex(historyIndex - 1);
+      setDesignConfig(history[historyIndex - 1]);
+    }
+  }
+
+  function redo() {
+    if (historyIndex < history.length - 1) {
+      setHistoryIndex(historyIndex + 1);
+      setDesignConfig(history[historyIndex + 1]);
     }
   }
 
@@ -98,7 +162,7 @@ export default function DesignerPage() {
       <AppShell title="Designer">
         <div className="flex items-center justify-center h-96">
           <div className="text-center">
-            <div className="animate-spin mb-4">⏳</div>
+            <div className="animate-spin mb-4 text-4xl">⏳</div>
             <p>Designer wird geladen...</p>
           </div>
         </div>
@@ -117,299 +181,113 @@ export default function DesignerPage() {
     );
   }
 
+  const platformConfig = PLATFORMS[platform];
+  const currentAreaConfig = designConfig[selectedArea];
+
   return (
     <AppShell title={`Designer - ${project.name}`}>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 h-screen">
         {/* Left: Controls */}
-        <div className="lg:col-span-1 space-y-4">
-          <div className="ui-card p-6">
-            <h3 className="text-lg font-semibold mb-4">Design-Parameter</h3>
-
-            {/* Step Indicator */}
-            <div className="mb-6">
-              <div className="flex gap-2 mb-3">
-                {[1, 2, 3, 4].map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => setStep(s)}
-                    className={`flex-1 py-2 rounded text-sm font-medium transition-colors ${
-                      step === s
-                        ? "bg-blue-600 text-white"
-                        : "bg-slate-700 text-slate-300 hover:bg-slate-600"
-                    }`}
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
-              <p className="text-xs text-slate-400">Schritt {step} von 4</p>
+        <div className="lg:col-span-1 overflow-y-auto space-y-4 pb-4">
+          {/* Toolbar */}
+          <div className="ui-card p-4 sticky top-0 z-10">
+            <div className="flex gap-2 mb-4">
+              <button
+                onClick={undo}
+                disabled={historyIndex === 0}
+                className="flex-1 px-3 py-2 bg-slate-700 hover:bg-slate-600 disabled:bg-slate-800 text-white rounded text-sm"
+                title="Rückgängig"
+              >
+                ↶
+              </button>
+              <button
+                onClick={redo}
+                disabled={historyIndex === history.length - 1}
+                className="flex-1 px-3 py-2 bg-slate-700 hover:bg-slate-600 disabled:bg-slate-800 text-white rounded text-sm"
+                title="Wiederherstellen"
+              >
+                ↷
+              </button>
+              <button
+                onClick={saveDesignVersion}
+                disabled={saving}
+                className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 text-white rounded text-sm font-medium"
+              >
+                {saving ? "..." : "💾"}
+              </button>
             </div>
 
-            {/* Step 1: Colors */}
-            {step === 1 && (
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm mb-2">Primärfarbe</label>
-                  <div className="flex gap-2">
-                    <input
-                      type="color"
-                      value={designConfig.primaryColor}
-                      onChange={(e) =>
-                        setDesignConfig({
-                          ...designConfig,
-                          primaryColor: e.target.value,
-                        })
-                      }
-                      className="w-12 h-10 rounded cursor-pointer"
-                    />
-                    <input
-                      type="text"
-                      value={designConfig.primaryColor}
-                      onChange={(e) =>
-                        setDesignConfig({
-                          ...designConfig,
-                          primaryColor: e.target.value,
-                        })
-                      }
-                      className="flex-1 px-2 py-1 bg-slate-700 border border-slate-600 rounded text-sm text-white"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm mb-2">Sekundärfarbe</label>
-                  <div className="flex gap-2">
-                    <input
-                      type="color"
-                      value={designConfig.secondaryColor}
-                      onChange={(e) =>
-                        setDesignConfig({
-                          ...designConfig,
-                          secondaryColor: e.target.value,
-                        })
-                      }
-                      className="w-12 h-10 rounded cursor-pointer"
-                    />
-                    <input
-                      type="text"
-                      value={designConfig.secondaryColor}
-                      onChange={(e) =>
-                        setDesignConfig({
-                          ...designConfig,
-                          secondaryColor: e.target.value,
-                        })
-                      }
-                      className="flex-1 px-2 py-1 bg-slate-700 border border-slate-600 rounded text-sm text-white"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm mb-2">Akzentfarbe</label>
-                  <div className="flex gap-2">
-                    <input
-                      type="color"
-                      value={designConfig.accentColor}
-                      onChange={(e) =>
-                        setDesignConfig({
-                          ...designConfig,
-                          accentColor: e.target.value,
-                        })
-                      }
-                      className="w-12 h-10 rounded cursor-pointer"
-                    />
-                    <input
-                      type="text"
-                      value={designConfig.accentColor}
-                      onChange={(e) =>
-                        setDesignConfig({
-                          ...designConfig,
-                          accentColor: e.target.value,
-                        })
-                      }
-                      className="flex-1 px-2 py-1 bg-slate-700 border border-slate-600 rounded text-sm text-white"
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Step 2: Layout */}
-            {step === 2 && (
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm mb-2">Button-Stil</label>
-                  <select
-                    value={designConfig.buttonStyle}
-                    onChange={(e) =>
-                      setDesignConfig({
-                        ...designConfig,
-                        buttonStyle: e.target.value,
-                      })
-                    }
-                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded text-sm text-white"
-                  >
-                    <option value="rounded">Abgerundet</option>
-                    <option value="square">Eckig</option>
-                    <option value="pill">Pille</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm mb-2">Karten-Stil</label>
-                  <select
-                    value={designConfig.cardStyle}
-                    onChange={(e) =>
-                      setDesignConfig({
-                        ...designConfig,
-                        cardStyle: e.target.value,
-                      })
-                    }
-                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded text-sm text-white"
-                  >
-                    <option value="elevated">Erhaben</option>
-                    <option value="flat">Flach</option>
-                    <option value="bordered">Umrandet</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm mb-2">Border-Radius</label>
-                  <input
-                    type="range"
-                    min="0"
-                    max="20"
-                    value={designConfig.borderRadius}
-                    onChange={(e) =>
-                      setDesignConfig({
-                        ...designConfig,
-                        borderRadius: parseInt(e.target.value),
-                      })
-                    }
-                    className="w-full"
-                  />
-                  <p className="text-xs text-slate-400 mt-1">
-                    {designConfig.borderRadius}px
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* Step 3: Typography */}
-            {step === 3 && (
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm mb-2">Schriftfamilie</label>
-                  <select
-                    value={designConfig.fontFamily}
-                    onChange={(e) =>
-                      setDesignConfig({
-                        ...designConfig,
-                        fontFamily: e.target.value,
-                      })
-                    }
-                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded text-sm text-white"
-                  >
-                    <option value="system-ui, -apple-system, sans-serif">
-                      System
-                    </option>
-                    <option value="Georgia, serif">Georgia (Serif)</option>
-                    <option value="Courier, monospace">Courier (Mono)</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm mb-2">Schriftgröße</label>
-                  <input
-                    type="range"
-                    min="12"
-                    max="20"
-                    value={designConfig.fontSize}
-                    onChange={(e) =>
-                      setDesignConfig({
-                        ...designConfig,
-                        fontSize: parseInt(e.target.value),
-                      })
-                    }
-                    className="w-full"
-                  />
-                  <p className="text-xs text-slate-400 mt-1">
-                    {designConfig.fontSize}px
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* Step 4: Advanced */}
-            {step === 4 && (
-              <div className="space-y-4">
-                <div>
-                  <label className="flex items-center gap-2 text-sm cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={designConfig.showABDABadge}
-                      onChange={(e) =>
-                        setDesignConfig({
-                          ...designConfig,
-                          showABDABadge: e.target.checked,
-                        })
-                      }
-                      className="w-4 h-4"
-                    />
-                    ABDA-Badge anzeigen
-                  </label>
-                </div>
-
-                <div>
-                  <label className="block text-sm mb-2">Abstände</label>
-                  <input
-                    type="range"
-                    min="8"
-                    max="32"
-                    value={designConfig.spacing}
-                    onChange={(e) =>
-                      setDesignConfig({
-                        ...designConfig,
-                        spacing: parseInt(e.target.value),
-                      })
-                    }
-                    className="w-full"
-                  />
-                  <p className="text-xs text-slate-400 mt-1">
-                    {designConfig.spacing}px
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {errorMsg && (
-              <div className="mt-4 p-3 bg-red-500/10 border border-red-500/30 rounded text-sm text-red-200">
-                {errorMsg}
-              </div>
-            )}
-
-            <button
-              onClick={saveDesignVersion}
-              disabled={saving}
-              className="w-full mt-6 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 text-white rounded font-medium transition-colors"
-            >
-              {saving ? "Speichert..." : "Speichern"}
-            </button>
+            {/* Platform Selector */}
+            <div>
+              <label className="block text-xs font-semibold mb-2">Plattform</label>
+              <select
+                value={platform}
+                onChange={(e) => setPlatform(e.target.value)}
+                className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded text-sm text-white"
+              >
+                {Object.entries(PLATFORMS).map(([key, p]) => (
+                  <option key={key} value={key}>
+                    {p.icon} {p.name}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
+
+          {/* Area Selector */}
+          <div className="ui-card p-4">
+            <h3 className="text-sm font-semibold mb-3">Bereiche</h3>
+            <div className="space-y-2">
+              {Object.entries(platformConfig.slots).map(([key, slot]) => (
+                <button
+                  key={key}
+                  onClick={() => setSelectedArea(key)}
+                  className={`w-full text-left px-3 py-2 rounded text-sm transition-colors ${
+                    selectedArea === key
+                      ? "bg-blue-600 text-white"
+                      : "bg-slate-700 text-slate-300 hover:bg-slate-600"
+                  }`}
+                >
+                  {slot.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Live Editor */}
+          {selectedArea && currentAreaConfig && (
+            <LiveEditor
+              area={selectedArea}
+              areaConfig={currentAreaConfig}
+              platformConfig={platformConfig}
+              onUpdate={(updates) => updateAreaConfig(selectedArea, updates)}
+            />
+          )}
+
+          {errorMsg && (
+            <div className="ui-card p-3 bg-red-500/10 border border-red-500/30 rounded text-sm text-red-200">
+              {errorMsg}
+            </div>
+          )}
         </div>
 
         {/* Right: Preview */}
-        <div className="lg:col-span-2">
-          <div className="ui-card p-6">
+        <div className="lg:col-span-3 overflow-y-auto">
+          <div className="ui-card p-6 h-full">
             <h3 className="text-lg font-semibold mb-4">Live-Vorschau</h3>
             <div
-              className="bg-white rounded-lg overflow-hidden"
+              className="bg-white rounded-lg overflow-hidden border-2 border-slate-700"
               style={{
-                backgroundColor: designConfig.secondaryColor,
-                fontFamily: designConfig.fontFamily,
+                backgroundColor: designConfig.global.secondaryColor,
+                fontFamily: designConfig.global.fontFamily,
               }}
             >
-              <ShopPreview config={designConfig} shopName={project.name} />
+              <AreaSelector
+                config={designConfig}
+                platform={platform}
+                selectedArea={selectedArea}
+                onSelectArea={setSelectedArea}
+              />
             </div>
           </div>
         </div>
