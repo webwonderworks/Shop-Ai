@@ -1,9 +1,14 @@
 const express = require("express");
-const { PrismaClient } = require("@prisma/client");
 const crypto = require("crypto");
 
 const router = express.Router();
-const prisma = new PrismaClient();
+
+// Prisma wird vom Server übergeben
+let prisma = null;
+
+function setPrisma(prismaInstance) {
+  prisma = prismaInstance;
+}
 
 const PLANS = {
   starter: { name: "Starter", price: 49, projects: 3 },
@@ -29,6 +34,13 @@ function generateToken(userId) {
 -------------------------------------------------- */
 router.post("/register", async (req, res) => {
   try {
+    if (!prisma) {
+      return res.status(500).json({
+        ok: false,
+        error: "Datenbankverbindung nicht verfügbar.",
+      });
+    }
+
     const { email, password, name } = req.body;
 
     if (!email || !password) {
@@ -85,6 +97,13 @@ router.post("/register", async (req, res) => {
 -------------------------------------------------- */
 router.post("/login", async (req, res) => {
   try {
+    if (!prisma) {
+      return res.status(500).json({
+        ok: false,
+        error: "Datenbankverbindung nicht verfügbar.",
+      });
+    }
+
     const { email, password } = req.body;
 
     if (!email || !password) {
@@ -130,6 +149,13 @@ router.post("/login", async (req, res) => {
 -------------------------------------------------- */
 router.post("/register-license", async (req, res) => {
   try {
+    if (!prisma) {
+      return res.status(500).json({
+        ok: false,
+        error: "Datenbankverbindung nicht verfügbar.",
+      });
+    }
+
     const { licenseCode, email, name } = req.body;
 
     if (!licenseCode || !email) {
@@ -221,6 +247,13 @@ router.post("/register-license", async (req, res) => {
 -------------------------------------------------- */
 router.get("/validate-license/:code", async (req, res) => {
   try {
+    if (!prisma) {
+      return res.status(500).json({
+        ok: false,
+        error: "Datenbankverbindung nicht verfügbar.",
+      });
+    }
+
     const { code } = req.params;
 
     const license = await prisma.license.findUnique({
@@ -272,6 +305,13 @@ router.get("/validate-license/:code", async (req, res) => {
 -------------------------------------------------- */
 router.get("/me", async (req, res) => {
   try {
+    if (!prisma) {
+      return res.status(500).json({
+        ok: false,
+        error: "Datenbankverbindung nicht verfügbar.",
+      });
+    }
+
     const token = req.headers.authorization?.split(" ")[1];
 
     if (!token) {
@@ -320,4 +360,4 @@ router.get("/me", async (req, res) => {
   }
 });
 
-module.exports = router;
+module.exports = { router, setPrisma };
