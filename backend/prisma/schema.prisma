@@ -7,13 +7,55 @@ datasource db {
 }
 
 model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  password     String?
+  name         String?
+  
+  // Subscription
+  plan         String   @default("free")  // free, starter, professional, enterprise
+  licenseCode  String?  @unique            // Mauve license
+  stripeId     String?  @unique            // Stripe customer ID
+  
+  // Limits
+  projectsUsed Int      @default(0)
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  projects     Project[]
+  subscription Subscription?
+}
+
+model Subscription {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  plan          String   // starter, professional, enterprise
+  stripeId      String?  @unique
+  status        String   @default("active") // active, canceled, past_due
+  
+  currentPeriodStart DateTime?
+  currentPeriodEnd   DateTime?
+  canceledAt         DateTime?
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model License {
   id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
+  code      String   @unique
+  plan      String   // starter, professional, enterprise
+  
+  usedBy    String?  // User ID
+  usedAt    DateTime?
+  
+  expiresAt DateTime?
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  projects  Project[]
 }
 
 model Project {
