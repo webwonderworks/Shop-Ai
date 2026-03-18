@@ -1,6 +1,6 @@
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { InsertUser, users, designProjects, mauveTemplates } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -87,6 +87,116 @@ export async function getUserByOpenId(openId: string) {
   const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
 
   return result.length > 0 ? result[0] : undefined;
+}
+
+/**
+ * Get all design projects for a user
+ */
+export async function getUserDesignProjects(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  const result = await db
+    .select()
+    .from(designProjects)
+    .where(eq(designProjects.userId, userId))
+    .orderBy((t) => desc(t.updatedAt));
+
+  return result;
+}
+
+/**
+ * Get a single design project by ID
+ */
+export async function getDesignProjectById(projectId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db
+    .select()
+    .from(designProjects)
+    .where(eq(designProjects.id, projectId))
+    .limit(1);
+
+  return result.length > 0 ? result[0] : undefined;
+}
+
+/**
+ * Create a new design project
+ */
+export async function createDesignProject(
+  userId: number,
+  data: {
+    name: string;
+    description?: string;
+    shopType: string;
+    brandProfile: string;
+  }
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db.insert(designProjects).values({
+    userId,
+    name: data.name,
+    description: data.description,
+    shopType: data.shopType,
+    brandProfile: data.brandProfile,
+    status: "draft",
+  });
+
+  return result;
+}
+
+/**
+ * Update design project
+ */
+export async function updateDesignProject(
+  projectId: number,
+  data: Partial<{
+    name: string;
+    description: string;
+    designConfig: string;
+    templateData: string;
+    status: "draft" | "in_progress" | "completed" | "exported";
+  }>
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db
+    .update(designProjects)
+    .set(data)
+    .where(eq(designProjects.id, projectId));
+
+  return result;
+}
+
+/**
+ * Get Mauve template by version
+ */
+export async function getMauveTemplate(version: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db
+    .select()
+    .from(mauveTemplates)
+    .where(eq(mauveTemplates.version, version))
+    .limit(1);
+
+  return result.length > 0 ? result[0] : undefined;
+}
+
+/**
+ * Get all Mauve templates
+ */
+export async function getAllMauveTemplates() {
+  const db = await getDb();
+  if (!db) return [];
+
+  const result = await db.select().from(mauveTemplates);
+  return result;
 }
 
 // TODO: add feature queries here as your schema grows.

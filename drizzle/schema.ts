@@ -25,4 +25,53 @@ export const users = mysqlTable("users", {
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
-// TODO: Add your tables here
+/**
+ * Design Projects table - stores shop design projects created by users
+ */
+export const designProjects = mysqlTable("design_projects", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  shopType: varchar("shopType", { length: 64 }).notNull(), // "local", "shipping", "specialty"
+  brandProfile: varchar("brandProfile", { length: 64 }).notNull(), // "modern", "classic", "medical", "emotional"
+  status: mysqlEnum("status", ["draft", "in_progress", "completed", "exported"]).default("draft"),
+  designConfig: text("designConfig"), // JSON string of design parameters
+  templateData: text("templateData"), // JSON string of Mauve template
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type DesignProject = typeof designProjects.$inferSelect;
+export type InsertDesignProject = typeof designProjects.$inferInsert;
+
+/**
+ * Design Versions table - stores version history of designs
+ */
+export const designVersions = mysqlTable("design_versions", {
+  id: int("id").autoincrement().primaryKey(),
+  projectId: int("projectId").notNull().references(() => designProjects.id),
+  versionNumber: int("versionNumber").notNull(),
+  designConfig: text("designConfig").notNull(), // JSON string
+  templateData: text("templateData").notNull(), // JSON string
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type DesignVersion = typeof designVersions.$inferSelect;
+export type InsertDesignVersion = typeof designVersions.$inferInsert;
+
+/**
+ * Mauve Templates table - stores predefined Mauve System3 template slots
+ */
+export const mauveTemplates = mysqlTable("mauve_templates", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  version: varchar("version", { length: 32 }).notNull(),
+  schema: text("schema").notNull(), // JSON string of template schema
+  description: text("description"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type MauveTemplate = typeof mauveTemplates.$inferSelect;
+export type InsertMauveTemplate = typeof mauveTemplates.$inferInsert;

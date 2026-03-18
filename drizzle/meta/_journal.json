@@ -1,5 +1,20 @@
 {
   "version": "7",
   "dialect": "mysql",
-  "entries": []
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1773862184754,
+      "tag": "0000_fast_doctor_spectrum",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1773862385581,
+      "tag": "0001_overconfident_true_believers",
+      "breakpoints": true
+    }
+  ]
 }
