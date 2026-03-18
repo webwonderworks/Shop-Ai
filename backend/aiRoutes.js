@@ -1,8 +1,13 @@
 const express = require("express");
-const { PrismaClient } = require("@prisma/client");
 
 const router = express.Router();
-const prisma = new PrismaClient();
+
+// Prisma wird vom Server übergeben
+let prisma = null;
+
+function setPrisma(prismaInstance) {
+  prisma = prismaInstance;
+}
 
 // Mock LLM response (in production, use real LLM API)
 async function generateAIDesignSuggestions(projectData) {
@@ -297,4 +302,4 @@ add_filter('loop_shop_columns', 'custom_product_grid');
   `.trim();
 }
 
-module.exports = router;
+module.exports = { router, setPrisma };

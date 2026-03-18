@@ -4,8 +4,8 @@ require("dotenv").config();
 
 const { PrismaClient } = require("@prisma/client");
 const { PrismaBetterSqlite3 } = require("@prisma/adapter-better-sqlite3");
-const { router: authRoutes, setPrisma } = require("./authRoutes");
-const aiRoutes = require("./aiRoutes");
+const { router: authRoutes, setPrisma: setAuthPrisma } = require("./authRoutes");
+const { router: aiRoutes, setPrisma: setAIPrisma } = require("./aiRoutes");
 
 console.log("SERVER FILE LOADED: backend/server.js");
 
@@ -19,8 +19,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Set Prisma instance for auth routes
-setPrisma(prisma);
+// Set Prisma instance for auth and AI routes
+setAuthPrisma(prisma);
+setAIPrisma(prisma);
 
 // Auth Routes
 app.use("/auth", authRoutes);
