@@ -5,6 +5,7 @@ require("dotenv").config();
 const { PrismaClient } = require("@prisma/client");
 const { PrismaBetterSqlite3 } = require("@prisma/adapter-better-sqlite3");
 const authRoutes = require("./authRoutes");
+const aiRoutes = require("./aiRoutes");
 
 console.log("SERVER FILE LOADED: backend/server.js");
 
@@ -20,6 +21,9 @@ app.use(express.json());
 
 // Auth Routes
 app.use("/auth", authRoutes);
+
+// AI Routes
+app.use("/ai", aiRoutes);
 
 let lastGeneratedShop = null;
 

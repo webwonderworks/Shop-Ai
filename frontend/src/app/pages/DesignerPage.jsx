@@ -4,6 +4,7 @@ import AppShell from "../components/AppShell";
 import ShopPreview from "../components/ShopPreview";
 import AreaSelector from "../components/AreaSelector";
 import LiveEditor from "../components/LiveEditor";
+import AIPanel from "../components/AIPanel";
 import { PLATFORMS } from "../../config/platforms";
 
 const API = "http://localhost:3001";
@@ -264,11 +265,36 @@ export default function DesignerPage() {
             />
           )}
 
+          {/* AI Panel */}
+          <AIPanel
+            projectId={id}
+            designConfig={designConfig}
+            platform={platform}
+          />
+
           {errorMsg && (
             <div className="ui-card p-3 bg-red-500/10 border border-red-500/30 rounded text-sm text-red-200">
               {errorMsg}
             </div>
           )}
+
+          {/* Export Button */}
+          <div className="ui-card p-4">
+            <button
+              onClick={() => {
+                const dataStr = JSON.stringify(designConfig, null, 2);
+                const dataBlob = new Blob([dataStr], { type: "application/json" });
+                const url = URL.createObjectURL(dataBlob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = `design-${Date.now()}.json`;
+                link.click();
+              }}
+              className="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded font-medium"
+            >
+              📥 Design herunterladen
+            </button>
+          </div>
         </div>
 
         {/* Right: Preview */}
