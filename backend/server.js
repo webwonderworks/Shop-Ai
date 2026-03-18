@@ -193,6 +193,13 @@ app.get("/projects/:id", async (req, res) => {
         id,
         userId: demoUser.id,
       },
+      include: {
+        versions: {
+          orderBy: {
+            versionNumber: "desc",
+          },
+        },
+      },
     });
 
     if (!project) {
@@ -211,6 +218,101 @@ app.get("/projects/:id", async (req, res) => {
     res.status(500).json({
       ok: false,
       error: "Projekt konnte nicht geladen werden.",
+      details: String(err),
+    });
+  }
+});
+
+/* --------------------------------------------------
+   CREATE DESIGN VERSION
+-------------------------------------------------- */
+app.post("/projects/:id/design-versions", async (req, res) => {
+  try {
+    const demoUser = await getOrCreateDemoUser();
+    const { id } = req.params;
+    const { designConfig, previewData, aiAnalysis } = req.body;
+
+    const project = await prisma.project.findFirst({
+      where: {
+        id,
+        userId: demoUser.id,
+      },
+    });
+
+    if (!project) {
+      return res.status(404).json({
+        ok: false,
+        error: "Projekt nicht gefunden.",
+      });
+    }
+
+    const lastVersion = await prisma.designVersion.findFirst({
+      where: { projectId: id },
+      orderBy: { versionNumber: "desc" },
+    });
+
+    const newVersionNumber = (lastVersion?.versionNumber || 0) + 1;
+
+    const version = await prisma.designVersion.create({
+      data: {
+        projectId: id,
+        versionNumber: newVersionNumber,
+        designConfig: designConfig || {},
+        previewData: previewData || null,
+        aiAnalysis: aiAnalysis || null,
+      },
+    });
+
+    res.status(201).json({
+      ok: true,
+      version,
+    });
+  } catch (err) {
+    console.error("POST /projects/:id/design-versions Fehler:", err);
+    res.status(500).json({
+      ok: false,
+      error: "Design-Version konnte nicht erstellt werden.",
+      details: String(err),
+    });
+  }
+});
+
+/* --------------------------------------------------
+   GET DESIGN VERSIONS
+-------------------------------------------------- */
+app.get("/projects/:id/design-versions", async (req, res) => {
+  try {
+    const demoUser = await getOrCreateDemoUser();
+    const { id } = req.params;
+
+    const project = await prisma.project.findFirst({
+      where: {
+        id,
+        userId: demoUser.id,
+      },
+    });
+
+    if (!project) {
+      return res.status(404).json({
+        ok: false,
+        error: "Projekt nicht gefunden.",
+      });
+    }
+
+    const versions = await prisma.designVersion.findMany({
+      where: { projectId: id },
+      orderBy: { versionNumber: "desc" },
+    });
+
+    res.json({
+      ok: true,
+      versions,
+    });
+  } catch (err) {
+    console.error("GET /projects/:id/design-versions Fehler:", err);
+    res.status(500).json({
+      ok: false,
+      error: "Design-Versionen konnten nicht geladen werden.",
       details: String(err),
     });
   }
