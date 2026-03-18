@@ -301,6 +301,53 @@ router.get("/validate-license/:code", async (req, res) => {
 });
 
 /* --------------------------------------------------
+   CREATE LICENSE (ADMIN ONLY)
+-------------------------------------------------- */
+router.post("/admin/create-license", async (req, res) => {
+  try {
+    if (!prisma) {
+      return res.status(500).json({
+        ok: false,
+        error: "Datenbankverbindung nicht verfügbar.",
+      });
+    }
+
+    const { code, plan } = req.body;
+
+    if (!code || !plan) {
+      return res.status(400).json({
+        ok: false,
+        error: "Code und Plan sind erforderlich.",
+      });
+    }
+
+    const license = await prisma.license.create({
+      data: {
+        code,
+        plan,
+        expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+      },
+    });
+
+    res.status(201).json({
+      ok: true,
+      license: {
+        code: license.code,
+        plan: license.plan,
+        expiresAt: license.expiresAt,
+      },
+    });
+  } catch (err) {
+    console.error("POST /auth/admin/create-license Fehler:", err);
+    res.status(500).json({
+      ok: false,
+      error: "Lizenz konnte nicht erstellt werden.",
+      details: String(err),
+    });
+  }
+});
+
+/* --------------------------------------------------
    GET USER INFO
 -------------------------------------------------- */
 router.get("/me", async (req, res) => {
