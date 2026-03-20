@@ -104,3 +104,21 @@
 - [ ] Performance-Optimierung
 - [ ] Benutzer-Dokumentation
 - [ ] Deployment-Vorbereitung
+
+
+## NEUE FEATURES (März 20, 2026)
+
+### Bug Fixes & Improvements
+- [x] "Projekt erstellen" Button Bug behoben (war ausgegraut)
+- [x] "Neues Design erstellen" Button auf Projekt-Karten hinzugefügt
+- [x] AIDesignEditor Komponente mit KI-Beschreibungs-Input
+- [x] ClickableShopPreview Integration im Editor
+- [x] Alle Tests bestanden
+
+### Noch zu implementieren
+- [ ] Git Push Integration (direkt zu GitHub)
+- [ ] Shopify Export (Live-Verbindung)
+- [ ] WooCommerce Export (Live-Verbindung)
+- [ ] Mauve System3 Export (Live-Verbindung)
+- [ ] Kundenfreigabe-Links (öffentliche Vorschau)
+- [ ] Versionskontrolle (Design-Versionen speichern)

@@ -346,10 +346,17 @@ export default function Wizard() {
           ) : (
             <Button
               onClick={handleCreate}
-              disabled={!formData.name || createProjectMutation.isPending}
-              className="gap-2"
+              disabled={!formData.name.trim() || createProjectMutation.isPending}
+              className="gap-2 bg-blue-600 hover:bg-blue-700"
             >
-              {createProjectMutation.isPending ? "Erstelle..." : "Projekt erstellen"}
+              {createProjectMutation.isPending ? (
+                <>
+                  <span className="inline-block animate-spin mr-2">⏳</span>
+                  Erstelle...
+                </>
+              ) : (
+                "Projekt erstellen"
+              )}
             </Button>
           )}
         </div>

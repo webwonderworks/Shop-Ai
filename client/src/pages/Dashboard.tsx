@@ -81,17 +81,24 @@ export default function Dashboard() {
                       <span className="text-muted-foreground">Status:</span>
                       <span className="font-medium capitalize">{project.status}</span>
                     </div>
-                    <div className="flex gap-2 pt-4">
-                      <Link href={`/wizard/${project.id}`}>
-                        <Button variant="outline" size="sm" className="gap-1">
-                          <Edit2 className="w-3 h-3" />
-                          Bearbeiten
+                    <div className="flex flex-col gap-2 pt-4">
+                      <Link href={`/editor/${project.id}`} className="w-full">
+                        <Button size="sm" className="gap-1 w-full bg-blue-600 hover:bg-blue-700">
+                          + Neues Design erstellen
                         </Button>
                       </Link>
-                      <Button variant="outline" size="sm" className="gap-1">
-                        <FileJson className="w-3 h-3" />
-                        Export
-                      </Button>
+                      <div className="flex gap-2">
+                        <Link href={`/wizard/${project.id}`} className="flex-1">
+                          <Button variant="outline" size="sm" className="gap-1 w-full">
+                            <Edit2 className="w-3 h-3" />
+                            Bearbeiten
+                          </Button>
+                        </Link>
+                        <Button variant="outline" size="sm" className="gap-1">
+                          <FileJson className="w-3 h-3" />
+                          Export
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
