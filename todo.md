@@ -1,5 +1,60 @@
 # Shop Designer Platform - TODO
 
+## MONTAG-PRÄSENTATION CHECKLIST (Valgux.com)
+
+### Phase 1: Backend & Auth ✅
+- [x] Backend-Server läuft (Port 3000)
+- [x] Prisma/Drizzle Datenbankschema
+- [x] CORS aktiviert
+- [x] Auth-Routen (login/register)
+- [ ] Auth mit Datenbank speichern (nicht nur Demo)
+- [ ] Password Hashing (bcrypt)
+
+### Phase 2: Frontend Landing Page ✅
+- [x] Landing Page mit Features & Pricing
+- [x] Navigation mit Login-Button
+- [x] Responsive Design
+- [ ] Performance-Optimierung
+
+### Phase 3: Dashboard & Projektmanagement
+- [x] Dashboard Layout
+- [ ] Projekt-Erstellung funktioniert
+- [ ] Projekt-Liste wird angezeigt
+- [ ] Projekt-Bearbeitung
+- [ ] Projekt-Löschung
+
+### Phase 4: Design-Editor
+- [ ] Editor-UI mit Live-Preview
+- [ ] Drag-Drop für Design-Elemente
+- [ ] Design-Parameter ändern (Farben, Fonts)
+- [ ] Echtzeit-Vorschau
+- [ ] Speichern funktioniert
+
+### Phase 5: AI-Integration
+- [ ] Design-Vorschläge generieren
+- [ ] KI-Analyse für Shop-Typ
+- [ ] Farb- & Typografie-Empfehlungen
+
+### Phase 6: Export & Integration
+- [ ] JSON-Export
+- [ ] Mauve System3 Export
+- [ ] Shopify Export
+
+### Phase 7: Sicherheit & Production
+- [ ] reCAPTCHA auf Registrierung
+- [ ] Rate-Limiting
+- [ ] CSRF-Protection
+- [ ] Input-Validierung
+- [ ] Production-Build testen
+
+### Phase 8: Deployment auf Valgux.com
+- [ ] Domain-Konfiguration
+- [ ] SSL-Zertifikat
+- [ ] Production-Build deployen
+- [ ] Monitoring & Logs
+
+## Alte Phase-Struktur (Referenz)
+
 ## Phase 1: Datenbankschema und Backend-Grundstruktur
 - [x] Datenbankschema für Projekte, Templates und Designs definieren
 - [x] Mauve-Template-Schema als JSON-Struktur modellieren
