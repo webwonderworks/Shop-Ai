@@ -10,6 +10,24 @@ export interface MauveTemplateSlot {
   constraints?: Record<string, unknown>;
 }
 
+export interface EditableElement {
+  id: string;
+  type: "header" | "hero" | "productCard" | "footer" | "text" | "image" | "button" | "section";
+  label: string;
+  editable: boolean;
+  properties: {
+    backgroundColor?: string;
+    textColor?: string;
+    borderColor?: string;
+    padding?: number;
+    margin?: number;
+    fontSize?: number;
+    fontFamily?: string;
+    borderRadius?: number;
+    [key: string]: any;
+  };
+}
+
 export interface MauveDesignConfig {
   // Color palette
   primaryColor: string;
@@ -40,6 +58,9 @@ export interface MauveDesignConfig {
   showSSLBadge: boolean;
   showPaymentMethods: boolean;
   trustElements: string[];
+
+  // Editable Elements
+  editableElements?: EditableElement[];
 }
 
 export interface MauveTemplate {
@@ -131,6 +152,32 @@ export const DEFAULT_MAUVE_TEMPLATE: MauveTemplate = {
 };
 
 /**
+ * Platform Types
+ */
+export const PLATFORMS = {
+  mauve: {
+    label: "Mauve System3",
+    description: "Mauve System3 E-Commerce Plattform",
+    icon: "🏥",
+  },
+  shopify: {
+    label: "Shopify",
+    description: "Shopify E-Commerce Plattform",
+    icon: "🛍️",
+  },
+  woocommerce: {
+    label: "WooCommerce",
+    description: "WordPress WooCommerce Shop",
+    icon: "📦",
+  },
+  shopware: {
+    label: "Shopware",
+    description: "Shopware E-Commerce Plattform",
+    icon: "⚙️",
+  },
+};
+
+/**
  * Shop Type Profiles
  */
 export const SHOP_TYPES = {
@@ -145,6 +192,26 @@ export const SHOP_TYPES = {
   specialty: {
     label: "Spezialsoriment",
     description: "Apotheke mit Spezialsoriment (Homöopathie, Pflege, etc.)",
+  },
+  fashion: {
+    label: "Mode & Bekleidung",
+    description: "Online-Shop für Mode und Bekleidung",
+  },
+  electronics: {
+    label: "Elektronik",
+    description: "Online-Shop für Elektronik und Technik",
+  },
+  beauty: {
+    label: "Beauty & Kosmetik",
+    description: "Online-Shop für Beauty und Kosmetik",
+  },
+  food: {
+    label: "Lebensmittel",
+    description: "Online-Shop für Lebensmittel und Getränke",
+  },
+  general: {
+    label: "Allgemeiner Shop",
+    description: "Allgemeiner Online-Shop",
   },
 };
 

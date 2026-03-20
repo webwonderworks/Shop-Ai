@@ -59,7 +59,9 @@ export const designRouter = router({
       z.object({
         name: z.string().min(1).max(255),
         description: z.string().optional(),
-        shopType: z.enum(["local", "shipping", "specialty"]),
+        shopUrl: z.string().optional(),
+        platform: z.enum(["mauve", "shopify", "woocommerce", "shopware"]).optional(),
+        shopType: z.string().min(1),
         brandProfile: z.enum(["modern", "classic", "medical", "emotional"]),
       })
     )

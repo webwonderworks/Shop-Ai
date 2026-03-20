@@ -1,3 +1,4 @@
+import React from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Loader2, ArrowRight, Zap, Users, BarChart3, Lock, Sparkles } from "lucide-react";
@@ -8,6 +9,13 @@ export default function Home() {
   const { user, loading, isAuthenticated } = useAuth();
   const [, navigate] = useLocation();
 
+  // Use useEffect to handle navigation after render
+  React.useEffect(() => {
+    if (!loading && isAuthenticated) {
+      navigate("/dashboard");
+    }
+  }, [loading, isAuthenticated, navigate]);
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -17,8 +25,7 @@ export default function Home() {
   }
 
   if (isAuthenticated) {
-    navigate("/dashboard");
-    return null;
+    return null; // Will redirect via useEffect
   }
 
   return (

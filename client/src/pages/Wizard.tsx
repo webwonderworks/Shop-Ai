@@ -3,15 +3,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
-import { SHOP_TYPES, BRAND_PROFILES } from "@shared/mauveSchema";
+import { SHOP_TYPES, BRAND_PROFILES, PLATFORMS } from "@shared/mauveSchema";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 
-type WizardStep = 1 | 2 | 3 | 4;
+type WizardStep = 1 | 2 | 3 | 4 | 5 | 6;
 
 interface WizardData {
   name: string;
   description: string;
-  shopType: "local" | "shipping" | "specialty";
+  shopUrl: string;
+  platform: "mauve" | "shopify" | "woocommerce" | "shopware";
+  shopType: string;
   brandProfile: "modern" | "classic" | "medical" | "emotional";
 }
 
@@ -21,6 +23,8 @@ export default function Wizard() {
   const [formData, setFormData] = useState<WizardData>({
     name: "",
     description: "",
+    shopUrl: "",
+    platform: "mauve",
     shopType: "local",
     brandProfile: "modern",
   });
@@ -38,7 +42,7 @@ export default function Wizard() {
   }
 
   const handleNext = () => {
-    if (step < 4) setStep((step + 1) as WizardStep);
+    if (step < 6) setStep((step + 1) as WizardStep);
   };
 
   const handlePrev = () => {
@@ -63,7 +67,7 @@ export default function Wizard() {
         {/* Progress Indicator */}
         <div className="mb-8">
           <div className="flex justify-between mb-4">
-            {[1, 2, 3, 4].map((s) => (
+            {[1, 2, 3, 4, 5, 6].map((s) => (
               <div
                 key={s}
                 className={`flex-1 h-2 mx-1 rounded-full transition-colors ${
@@ -73,7 +77,7 @@ export default function Wizard() {
             ))}
           </div>
           <p className="text-sm text-muted-foreground text-center">
-            Schritt {step} von 4
+            Schritt {step} von 6
           </p>
         </div>
 
@@ -115,8 +119,81 @@ export default function Wizard() {
           </Card>
         )}
 
-        {/* Step 2: Shop Type */}
+        {/* Step 2: Platform Selection */}
         {step === 2 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>E-Commerce Plattform</CardTitle>
+              <CardDescription>
+                Wählen Sie Ihre E-Commerce Plattform.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {Object.entries(PLATFORMS).map(([key, value]) => (
+                <label
+                  key={key}
+                  className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-colors ${
+                    formData.platform === key
+                      ? "border-primary bg-primary/5"
+                      : "border-muted hover:border-muted-foreground"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="platform"
+                    value={key}
+                    checked={formData.platform === key}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        platform: e.target.value as any,
+                      })
+                    }
+                    className="mr-3"
+                  />
+                  <div>
+                    <div className="font-medium">{value.label}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {value.description}
+                    </div>
+                  </div>
+                </label>
+              ))}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Step 3: Shop URL */}
+        {step === 3 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Shop-URL</CardTitle>
+              <CardDescription>
+                Geben Sie die URL Ihres Online-Shops ein.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Shop-URL</label>
+                <input
+                  type="url"
+                  placeholder="z.B. https://example.com"
+                  value={formData.shopUrl}
+                  onChange={(e) =>
+                    setFormData({ ...formData, shopUrl: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+                <p className="text-xs text-muted-foreground mt-2">
+                  Diese URL wird für die Live-Vorschau verwendet.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Step 4: Shop Type */}
+        {step === 4 && (
           <Card>
             <CardHeader>
               <CardTitle>Shop-Typ</CardTitle>
@@ -159,8 +236,8 @@ export default function Wizard() {
           </Card>
         )}
 
-        {/* Step 3: Brand Profile */}
-        {step === 3 && (
+        {/* Step 5: Brand Profile */}
+        {step === 5 && (
           <Card>
             <CardHeader>
               <CardTitle>Markenprofil</CardTitle>
@@ -201,8 +278,8 @@ export default function Wizard() {
           </Card>
         )}
 
-        {/* Step 4: Review */}
-        {step === 4 && (
+        {/* Step 6: Review */}
+        {step === 6 && (
           <Card>
             <CardHeader>
               <CardTitle>Zusammenfassung</CardTitle>
@@ -221,10 +298,18 @@ export default function Wizard() {
                   <div className="font-medium">{formData.description}</div>
                 </div>
                 <div>
-                  <div className="text-sm text-muted-foreground">Shop-Typ</div>
+                  <div className="text-sm text-muted-foreground">Plattform</div>
                   <div className="font-medium">
-                    {SHOP_TYPES[formData.shopType as keyof typeof SHOP_TYPES].label}
+                    {PLATFORMS[formData.platform as keyof typeof PLATFORMS].label}
                   </div>
+                </div>
+                <div>
+                  <div className="text-sm text-muted-foreground">Shop-URL</div>
+                  <div className="font-medium">{formData.shopUrl}</div>
+                </div>
+                <div>
+                  <div className="text-sm text-muted-foreground">Shop-Typ</div>
+                  <div className="font-medium">{formData.shopType}</div>
                 </div>
                 <div>
                   <div className="text-sm text-muted-foreground">Markenprofil</div>
@@ -253,7 +338,7 @@ export default function Wizard() {
             Zurück
           </Button>
 
-          {step < 4 ? (
+          {step < 6 ? (
             <Button onClick={handleNext} className="gap-2">
               Weiter
               <ChevronRight className="w-4 h-4" />
