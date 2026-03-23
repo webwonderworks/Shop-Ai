@@ -33,7 +33,10 @@ export default function Home() {
       {/* Navigation */}
       <nav className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <div className="text-2xl font-bold text-blue-600">Shop Designer</div>
+          <div className="flex items-center gap-2">
+            <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663448315463/NCbvv64VoYJYxkmYwC94aN/valgux-logo-PhqXi7hwVzVAvCT6R9N7Xy.webp" alt="Valgux" className="w-8 h-8" />
+            <span className="text-2xl font-bold text-blue-600">Valgux</span>
+          </div>
           <a href={getLoginUrl()} className="text-blue-600 hover:text-blue-700 font-medium">
             Login
           </a>
@@ -47,7 +50,7 @@ export default function Home() {
             Gestalten Sie Ihren Shop mit KI
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Shop Designer Platform - Das KI-gestützte Tool für professionelle Shop-Frontend-Designs. Für Mauve System3, Shopify, WooCommerce und mehr.
+            Valgux - Das KI-gestützte Tool für professionelle Shop-Frontend-Designs. Für Mauve System3, Shopify, WooCommerce und mehr.
           </p>
           <div className="flex gap-4 justify-center">
             <a href={getLoginUrl()} className="inline-block">
